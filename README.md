@@ -1,6 +1,8 @@
 # Supermarket-Optimization
 
-This program lists the groups of item numbers (group size 3) that appear together at least a certain number of times in the .dat file. The number of times is determined by the input of sigma.
+This program helps determine which sets of three items in a supermarket should be grouped together to maximize sales. It takes in a ".dat" transaction log file and outputs the desired results depending on the sigma value that you set. The sigma value determines the minimum frequency that a set of three items must show up together in order to be written out to the output file. 
+
+You will notice in the source code that there are a couple optimizations done to shave off some fractions of seconds.
 
 In order to run this program, do the following:
   - Clone or download the repository

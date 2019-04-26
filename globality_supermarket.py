@@ -1,6 +1,6 @@
 import csv
-import sys
 import argparse
+import itertools
 
 def file_to_list(file):
     retail_list = []
@@ -13,36 +13,44 @@ def file_to_list(file):
         i.remove('')
     return retail_list
 
-
 def supermarket_optimization(sigma, file):
-    #use helper function to convert dat file to an easy-to-traverse list without whitespaces
+    comb_freq_dict = dict()
+
+    #this just converts the file into a list of lists and removes unnecessary whitespaces
     retail_list = file_to_list(file)
 
-    #put sets of three into dictionary and set the value to the frequency of those sets appearing in retail_list together
-    my_dict = dict()
-    row_length = len(retail_list)
-    for i in range(row_length):
-        for j in range(len(retail_list[i])-2):
-            first = retail_list[i][j]
-            second = retail_list[i][j+1]
-            third = retail_list[i][j+2]
-            if first+','+second+','+third not in my_dict:
-                my_dict[first+','+second+','+third]=0
+    #first optimization
+    new_retail_list = less_than_three(retail_list)
+
+    #second optimization
+    sorted_retail_list = sorted(new_retail_list, key=len)
+
+    for x in range(len(sorted_retail_list)):
+        comb_list = list(itertools.combinations(sorted_retail_list[x], 3))
+        for i in comb_list:
+            if i not in comb_freq_dict:
+                comb_freq_dict[i] = 1
             else:
-                my_dict[first+','+second+','+third] = my_dict[first+','+second+','+third] +1
+                comb_freq_dict[i] = comb_freq_dict[i] +1
 
-    #use helper function to return file with values that meets the sigma value criteria for frequency
-    frequent_items(sigma, my_dict)
+    frequent_items(sigma, comb_freq_dict)
 
 
+# first optimization: get rid of transactions that have less than 3 items.
+def less_than_three(lst): #works
+    new_lst = []
+    for i in lst:
+        if len(i)>=3:
+            new_lst.append(i)
+    return new_lst
+
+# this function does the final bit of work and writes results to a file
 def frequent_items(sig, my_dict):
-
     with open('supermarket_optimization.txt', 'w') as f:
         f.write('Item Set Size, co-occurrence frequency, item numbers \n')
         for item, freq in my_dict.items():
             if freq >= sig:
                 f.write('3, '+str(freq)+', '+str(item)+'\n')
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
