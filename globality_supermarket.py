@@ -1,6 +1,6 @@
 import csv
-import argparse
-import itertools
+import pyfpgrowth
+import argparse 
 
 def file_to_list(file):
     retail_list = []
@@ -17,23 +17,17 @@ def supermarket_optimization(sigma, file):
     comb_freq_dict = dict()
 
     #this just converts the file into a list of lists and removes unnecessary whitespaces
-    retail_list = file_to_list(file)
+    transactions = file_to_list('/Users/jashvora/Downloads/retail_25k.dat')
 
-    #first optimization
-    new_retail_list = less_than_three(retail_list)
+    #get an optimized list of transactions with use of helper function
+    opt_transactions = less_than_three(transactions)
+    patterns = pyfpgrowth.find_frequent_patterns(opt_transactions, sigma)
+    three_or_more_set = dict()
+    for key, val in patterns.items():
+        if len(key) >=3:
+            three_or_more_set[key] = val
 
-    #second optimization
-    sorted_retail_list = sorted(new_retail_list, key=len)
-
-    for x in range(len(sorted_retail_list)):
-        comb_list = list(itertools.combinations(sorted_retail_list[x], 3))
-        for i in comb_list:
-            if i not in comb_freq_dict:
-                comb_freq_dict[i] = 1
-            else:
-                comb_freq_dict[i] = comb_freq_dict[i] +1
-
-    frequent_items(sigma, comb_freq_dict)
+    write_to_file(sigma, three_or_more_set)
 
 
 # first optimization: get rid of transactions that have less than 3 items.
@@ -45,12 +39,11 @@ def less_than_three(lst): #works
     return new_lst
 
 # this function does the final bit of work and writes results to a file
-def frequent_items(sig, my_dict):
+def write_to_file(sig, my_dict):
     with open('supermarket_optimization.txt', 'w') as f:
         f.write('Item Set Size, co-occurrence frequency, item numbers \n')
         for item, freq in my_dict.items():
-            if freq >= sig:
-                f.write('3, '+str(freq)+', '+str(item)+'\n')
+            f.write(str(len(item))+', '+str(freq)+', '+str(item)+'\n')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
